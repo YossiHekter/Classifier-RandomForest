@@ -30,8 +30,14 @@ def init(top, gui, *args, **kwargs):
 def destroy_window():
     # Function which closes the window.
     global top_level
-    top_level.destroy()
-    top_level = None
+    define = True
+    try:
+        top_level
+    except NameError:
+        define = False
+    if define:
+        top_level.destroy()
+        top_level = None
 
 
 

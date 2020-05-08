@@ -4,17 +4,18 @@ import pandas as pd
 from tkinter import Tk
 from tkinter.filedialog import askopenfilename
 import numpy as np
-from sklearn.ensemble import RandomForestClassifier
 from popup import *
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
 import seaborn as sn
+from model import Model
 
-classifier = None
+my_model = None
 
 
 def train_model():
-    global classifier
+    global my_model
+    error = False
     # read the file
     Tk().withdraw()
     filename = askopenfilename()
@@ -32,46 +33,53 @@ def train_model():
             dataset = dataset.drop(columns=['freeText', 'date'])
         except ValueError:
             popup_format_error("train")
+            error = True
 
-        # View the top 5 rows
-        print(dataset.head())
+        if len(dataset) < 10:
+            popup_msg("The file must contains a minimum of 10 records!")
+        elif not error:
+            # View the top 5 rows
+            print(dataset.head())
 
-        # Create a new column that for each row, generates a random number between 0 and 1, and
-        # if that value is less than or equal to .75, then sets the value of that cell as True
-        # and false otherwise. This is a quick and dirty way of randomly assigning some rows to
-        # be used as the training data and some as the test data.
-        dataset['is_train'] = np.random.uniform(0, 1, len(dataset)) <= 0.8
-        train, test = dataset[dataset['is_train'] == 1], dataset[dataset['is_train'] == 0]
+            # Create a new column that for each row, generates a random number between 0 and 1, and
+            # if that value is less than or equal to .75, then sets the value of that cell as True
+            # and false otherwise. This is a quick and dirty way of randomly assigning some rows to
+            # be used as the training data and some as the test data.
+            dataset['is_train'] = np.random.uniform(0, 1, len(dataset)) <= 0.8
+            train, test = dataset[dataset['is_train'] == 1], dataset[dataset['is_train'] == 0]
 
-        # train['target'] contains the actual classification. Before we can use it,
-        # we need to convert each species name into a digit. So, in this case there
-        # are three target, which have been coded as 0, 1, or 2.
-        target = pd.factorize(train['target'])[0]
+            # train['target'] contains the actual classification. Before we can use it,
+            # we need to convert each species name into a digit. So, in this case there
+            # are three target, which have been coded as 0, 1, or 2.
+            target = pd.factorize(train['target'])[0]
 
-        # Create a list of the feature column's
-        features = dataset.columns[2:26]
+            # Create a list of the feature column's
+            features = dataset.columns[2:26]
 
-        # Create a random forest Classifier.
-        classifier = RandomForestClassifier(n_jobs=2, random_state=0)
-        classifier.fit(train[features], target)
-        predict = classifier.predict(test[features]).tolist()
+            # Create a random forest Classifier.
+            my_model = Model()
+            my_model.build_rf_model(train[features], target)
+            predict = my_model.predict(test[features])
+            # classifier = RandomForestClassifier(n_jobs=2, random_state=0)
+            # classifier.fit(train[features], target)
+            # predict = classifier.predict(test[features]).tolist()
 
-        # Create confusion matrix
-        real = normalize_value(test["target"])
-        conf_mat = confusion_matrix(real, predict)
-        df_cm = pd.DataFrame(conf_mat, range(3), range(3))
-        sn.set(font_scale=1.4)  # for label size
-        sn.heatmap(df_cm, annot=True, annot_kws={"size": 16})  # font size
-        plt.show()
+            # Create confusion matrix
+            real = normalize_value(test["target"])
+            conf_mat = confusion_matrix(real, predict)
+            df_cm = pd.DataFrame(conf_mat, range(3), range(3))
+            sn.set(font_scale=1.4)  # for label size
+            sn.heatmap(df_cm, annot=True, annot_kws={"size": 16})  # font size
+            plt.show()
 
-        # Measure the accuracy
-        sm = difflib.SequenceMatcher(None, real, predict)
-        model_accuracy(str("%.3f" % sm.ratio()))
-
+            # Measure the accuracy
+            sm = difflib.SequenceMatcher(None, real, predict)
+            model_accuracy(str("%.3f" % sm.ratio()))
 
 
 def classifier_function():
-    global classifier
+    global my_model
+    error = False
     # read the file
     Tk().withdraw()
     filename = askopenfilename()
@@ -80,26 +88,28 @@ def classifier_function():
     else:
         dataset = pd.read_csv(filename)
 
-        if classifier is not None:
+        # Create a data frame with the four feature variables
+        try:
+            dataset = pd.read_csv(filename)
             # Create a data frame with the four feature variables
-            try:
-                dataset = pd.read_csv(filename)
-                # Create a data frame with the four feature variables
-                dataset.columns = ["dogID", "dogName", "attribute1", "attribute2", "attribute3", "attribute4",
-                                   "attribute5",
-                                   "attribute6", "attribute7", "attribute8", "attribute9", "attribute10",
-                                   "attribute11", "attribute12", "attribute13", "attribute14", "attribute15",
-                                   "attribute16", "attribute17", "attribute18", "attribute19", "attribute20",
-                                   "attribute21", "attribute22", "attribute23", "attribute24", "freeText", "date"]
-                dataset = dataset.drop(columns=['freeText', 'date'])
-            except ValueError:
-                popup_format_error("classifier")
+            dataset.columns = ["dogID", "dogName", "attribute1", "attribute2", "attribute3", "attribute4",
+                               "attribute5",
+                               "attribute6", "attribute7", "attribute8", "attribute9", "attribute10",
+                               "attribute11", "attribute12", "attribute13", "attribute14", "attribute15",
+                               "attribute16", "attribute17", "attribute18", "attribute19", "attribute20",
+                               "attribute21", "attribute22", "attribute23", "attribute24", "freeText", "date"]
+            dataset = dataset.drop(columns=['freeText', 'date'])
+        except ValueError:
+            popup_format_error("classifier")
+            error = True
 
-            # Create a list of the feature column's names
-            features = dataset.columns[2:26]
+        # Create a list of the feature column's names
+        features = dataset.columns[2:26]
+
+        if not error and my_model is not None and my_model.is_inited():
 
             # Apply the Classifier we trained to the test data (which, remember, it has never seen before)
-            predict = classifier.predict_proba(dataset[features])
+            predict = my_model.predict_proba(dataset[features])
             list_prob_0 = []
             list_prob_1 = []
             list_prob_2 = []
