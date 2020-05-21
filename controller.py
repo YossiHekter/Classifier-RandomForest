@@ -1,4 +1,5 @@
 import difflib
+import threading
 
 import pandas as pd
 from tkinter import Tk
@@ -43,6 +44,10 @@ def train_model():
             predict = 0
             accuracy = 0
 
+            # Display progress bar while the model training
+            progress_bar_thread = threading.Thread(target=bar)
+            progress_bar_thread.start()
+
             # Create a random forest Classifier.
             # To avoid over fitting or bad classifier we make sure the accurancy of the model is between 0.7-0.9
             while accuracy < 0.7 or accuracy > 0.9:
@@ -64,6 +69,8 @@ def train_model():
                 real = normalize_value(test["target"])
                 sm = difflib.SequenceMatcher(None, real, predict)
                 accuracy = sm.ratio()
+
+            progress_bar_thread.join()
 
             # Create confusion matrix
             conf_mat = confusion_matrix(real, predict)
@@ -116,9 +123,9 @@ def classifier_function():
                 list_prob_0.append("%.2f" % predict[index][0])
                 list_prob_1.append("%.2f" % predict[index][1])
                 list_prob_2.append("%.2f" % predict[index][2])
-            dataset["predict a"] = list_prob_0
-            dataset["predict b"] = list_prob_1
-            dataset["predict c"] = list_prob_2
+            dataset["Guide dog"] = list_prob_0
+            dataset["Disabled"] = list_prob_1
+            dataset["Traumatized"] = list_prob_2
             popup_output(dataset)
         else:
             popup_msg("You have to train the model first!")

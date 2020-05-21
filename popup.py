@@ -1,8 +1,13 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import filedialog
+from tkinter.ttk import Progressbar
 
 
-def popup_output(dataset):
+def popup_output(new_dataset):
+
+    global dataset
+    dataset = new_dataset
     # Creating tkinter window
     window = tk.Tk()
     window.title("Classifier results")
@@ -23,6 +28,9 @@ def popup_output(dataset):
     # Calling pack method w.r.to verical
     # scrollbar
     verscrlbar.pack(side='right', fill='x')
+
+    b1 = ttk.Button(window, text="Save", command=exportCSV)
+    b1.pack(side="left")
 
     # Configuring treeview
     treev.configure(xscrollcommand=verscrlbar.set)
@@ -49,8 +57,19 @@ def popup_output(dataset):
 
     for index in range(len(dataset)-1):
         treev.insert("", 'end', text="L1",
-                     values=(dataset["dogID"][index], dataset["predict a"][index],
-                             dataset["predict b"][index], dataset["predict c"][index]))
+                     values=(dataset["dogID"][index], dataset["Guide dog"][index],
+                             dataset["Disabled"][index], dataset["Traumatized"][index]))
+
+
+def exportCSV():
+    global dataset
+    classified = dataset.drop(columns=["attribute1", "attribute2", "attribute3", "attribute4",
+                             "attribute5", "attribute6", "attribute7", "attribute8", "attribute9", "attribute10",
+                             "attribute11", "attribute12", "attribute13", "attribute14", "attribute15",
+                             "attribute16", "attribute17", "attribute18", "attribute19", "attribute20",
+                             "attribute21", "attribute22", "attribute23", "attribute24"])
+    export_file_path = filedialog.asksaveasfilename(defaultextension='.csv')
+    classified.to_csv(export_file_path, index=False, header=True)
 
 
 def popup_msg(msg):
@@ -93,4 +112,17 @@ def model_accuracy(msg):
     label.pack(side="top", fill="x", pady=10)
     B1 = ttk.Button(popup, text="Ok", command=popup.destroy)
     B1.pack()
+    popup.mainloop()
+
+
+def bar():
+    popup = tk.Tk()
+    popup.geometry("250x90")
+    popup.wm_title("Training")
+    label = ttk.Label(popup, text="Please wait while the model is training")
+    label.pack(side="top", fill="x", pady=10)
+    bar = Progressbar(popup, length=200)
+    bar.start(50)
+    bar.pack(side="top", fill="x", pady=10)
+    popup.after(5000, lambda: popup.destroy())
     popup.mainloop()
