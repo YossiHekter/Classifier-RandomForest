@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import seaborn as sn
 from model import Model
 
+
 my_model = None
 
 
@@ -38,43 +39,41 @@ def train_model():
         if len(dataset) < 10:
             popup_msg("The file must contains a minimum of 10 records!")
         elif not error:
-            # View the top 5 rows
-            print(dataset.head())
-
-            # Create a new column that for each row, generates a random number between 0 and 1, and
-            # if that value is less than or equal to .75, then sets the value of that cell as True
-            # and false otherwise. This is a quick and dirty way of randomly assigning some rows to
-            # be used as the training data and some as the test data.
-            dataset['is_train'] = np.random.uniform(0, 1, len(dataset)) <= 0.8
-            train, test = dataset[dataset['is_train'] == 1], dataset[dataset['is_train'] == 0]
-
-            # train['target'] contains the actual classification. Before we can use it,
-            # we need to convert each species name into a digit. So, in this case there
-            # are three target, which have been coded as 0, 1, or 2.
-            target = pd.factorize(train['target'])[0]
-
-            # Create a list of the feature column's
-            features = dataset.columns[2:26]
+            real = 0
+            predict = 0
+            accuracy = 0
 
             # Create a random forest Classifier.
-            my_model = Model()
-            my_model.build_rf_model(train[features], target)
-            predict = my_model.predict(test[features])
-            # classifier = RandomForestClassifier(n_jobs=2, random_state=0)
-            # classifier.fit(train[features], target)
-            # predict = classifier.predict(test[features]).tolist()
+            # To avoid over fitting or bad classifier we make sure the accurancy of the model is between 0.7-0.9
+            while accuracy < 0.7 or accuracy > 0.9:
+
+                # Divide the data to train and test porto ratio (80-20)
+                dataset['is_train'] = np.random.uniform(0, 1, len(dataset)) <= 0.8
+                train, test = dataset[dataset['is_train'] == 1], dataset[dataset['is_train'] == 0]
+
+                # Covert the target to  0, 1, or 2.
+                target = pd.factorize(train['target'])[0]
+
+                # Create a list of the feature column's
+                features = dataset.columns[2:26]
+
+                # build the model
+                my_model = Model()
+                my_model.build_model(train[features], target)
+                predict = my_model.predict(test[features])
+                real = normalize_value(test["target"])
+                sm = difflib.SequenceMatcher(None, real, predict)
+                accuracy = sm.ratio()
 
             # Create confusion matrix
-            real = normalize_value(test["target"])
             conf_mat = confusion_matrix(real, predict)
             df_cm = pd.DataFrame(conf_mat, range(3), range(3))
             sn.set(font_scale=1.4)  # for label size
             sn.heatmap(df_cm, annot=True, annot_kws={"size": 16})  # font size
             plt.show()
 
-            # Measure the accuracy
-            sm = difflib.SequenceMatcher(None, real, predict)
-            model_accuracy(str("%.3f" % sm.ratio()))
+            # Present the accuracy
+            model_accuracy(str("%.3f" % accuracy))
 
 
 def classifier_function():

@@ -6,9 +6,9 @@ class Model:
     model = None
 
     # Create a random forest Classifier.
-    def build_rf_model(self, train, target):
+    def build_model(self, train, target):
         global model
-        model = RandomForestClassifier(n_jobs=2, random_state=0)
+        model = RandomForestClassifier(n_jobs=1, random_state=0)
         model.fit(train, target)
 
     # Predict using our model, return the answer as list
