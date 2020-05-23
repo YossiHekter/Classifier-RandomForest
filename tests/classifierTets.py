@@ -42,6 +42,7 @@ class TestClassifier(unittest.TestCase):
     def test_valid_csv(self):
         controller.askopenfilename = Mock(return_value='C:/school/guide_dog/resource/Data.csv')
         controller.model_accuracy = Mock(return_value='')
+        controller.bar = Mock(return_value='')
         controller.train_model()
         controller.askopenfilename = Mock(return_value='C:/school/guide_dog/resource/New dogs.csv')
         controller.model_accuracy = Mock(return_value='')
@@ -52,6 +53,7 @@ class TestClassifier(unittest.TestCase):
     def test_one_row_valid_csv(self):
         controller.askopenfilename = Mock(return_value='C:/school/guide_dog/resource/Data.csv')
         controller.model_accuracy = Mock(return_value='')
+        controller.bar = Mock(return_value='')
         controller.train_model()
         controller.askopenfilename = Mock(return_value='C:/school/guide_dog/resource/One row classifier.csv')
         controller.model_accuracy = Mock(return_value='')
@@ -62,6 +64,7 @@ class TestClassifier(unittest.TestCase):
     def test_1000_record_valid_csv(self):
         controller.askopenfilename = Mock(return_value='C:/school/guide_dog/resource/Data.csv')
         controller.model_accuracy = Mock(return_value='')
+        controller.bar = Mock(return_value='')
         controller.train_model()
         controller.askopenfilename = Mock(return_value='C:/school/guide_dog/resource/1000 rows classifier.csv')
         controller.model_accuracy = Mock(return_value='')

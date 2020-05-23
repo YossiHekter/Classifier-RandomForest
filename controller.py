@@ -40,8 +40,6 @@ def train_model():
         if len(dataset) < 10:
             popup_msg("The file must contains a minimum of 10 records!")
         elif not error:
-            real = 0
-            predict = 0
             accuracy = 0
 
             # Display progress bar while the model training
@@ -63,10 +61,10 @@ def train_model():
                 features = dataset.columns[2:26]
 
                 # build the model
+                real = normalize_value(test["target"])
                 my_model = Model()
                 my_model.build_model(train[features], target)
                 predict = my_model.predict(test[features])
-                real = normalize_value(test["target"])
                 sm = difflib.SequenceMatcher(None, real, predict)
                 accuracy = sm.ratio()
 

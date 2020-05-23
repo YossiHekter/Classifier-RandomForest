@@ -15,6 +15,7 @@ class TestTrain(unittest.TestCase):
         controller.askopenfilename = Mock(return_value='C:/school/guide_dog/resource/Data.csv')
         controller.popup_format_error = Mock(return_value='')
         controller.popup_msg = Mock(return_value='')
+        controller.bar = Mock(return_value='')
         controller.classifier_function()
         self.assertTrue(controller.popup_msg.called)
 
@@ -22,7 +23,7 @@ class TestTrain(unittest.TestCase):
         controller.askopenfilename = Mock(return_value='C:/school/guide_dog/resource/Data.csv')
         controller.model_accuracy = Mock(return_value='')
         controller.popup_output = Mock(return_value='')
-
+        controller.bar = Mock(return_value='')
         # popup that called after the classifier finished successfully
         controller.popup_output = Mock(return_value='')
 

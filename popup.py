@@ -69,7 +69,8 @@ def exportCSV():
                              "attribute16", "attribute17", "attribute18", "attribute19", "attribute20",
                              "attribute21", "attribute22", "attribute23", "attribute24"])
     export_file_path = filedialog.asksaveasfilename(defaultextension='.csv')
-    classified.to_csv(export_file_path, index=False, header=True)
+    if not export_file_path == '':
+        classified.to_csv(export_file_path, index=False, header=True)
 
 
 def popup_msg(msg):
