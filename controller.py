@@ -47,26 +47,20 @@ def train_model():
             progress_bar_thread.start()
 
             # Create a random forest Classifier.
-            # To avoid over fitting or bad classifier we make sure the accurancy of the model is between 0.7-0.9
-            while accuracy < 0.7 or accuracy > 0.9:
-
-                # Divide the data to train and test porto ratio (80-20)
-                dataset['is_train'] = np.random.uniform(0, 1, len(dataset)) <= 0.8
-                train, test = dataset[dataset['is_train'] == 1], dataset[dataset['is_train'] == 0]
-
-                # Covert the target to  0, 1, or 2.
-                target = pd.factorize(train['target'])[0]
-
-                # Create a list of the feature column's
-                features = dataset.columns[2:26]
-
-                # build the model
-                real = normalize_value(test["target"])
-                my_model = Model()
-                my_model.build_model(train[features], target)
-                predict = my_model.predict(test[features])
-                sm = difflib.SequenceMatcher(None, real, predict)
-                accuracy = sm.ratio()
+            # Divide the data to train and test porto ratio (80-20)
+            dataset['is_train'] = np.random.uniform(0, 1, len(dataset)) <= 0.8
+            train, test = dataset[dataset['is_train'] == 1], dataset[dataset['is_train'] == 0]
+            # Covert the target to  0, 1, or 2.
+            target = pd.factorize(train['target'])[0]
+            # Create a list of the feature column's
+            features = dataset.columns[2:26]
+            # build the model
+            real = normalize_value(test["target"])
+            my_model = Model()
+            my_model.build_model(train[features], target)
+            predict = my_model.predict(test[features])
+            sm = difflib.SequenceMatcher(None, real, predict)
+            accuracy = sm.ratio()
 
             progress_bar_thread.join()
 
